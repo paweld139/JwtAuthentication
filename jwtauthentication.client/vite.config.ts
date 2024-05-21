@@ -50,6 +50,18 @@ export default defineConfig({
             '^/login': {
                 target,
                 secure: false
+            },
+            '^/register': {
+                target,
+                secure: false
+            },
+            '^/refresh': {
+                target,
+                secure: false
+            },
+            '^/logout': {
+                target,
+                secure: false
             }
         },
         port: 5173,

@@ -5,7 +5,7 @@ namespace JwtAuthentication.Server.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class UserController(SignInManager<IdentityUser> signInManager) : ControllerBase
+    public class UserController(SignInManager<IdentityUser> signInManager, IHttpContextAccessor httpContextAccessor) : ControllerBase
     {
         [HttpGet("Login")]
         public async Task<IActionResult> Login(string user, string password)
@@ -19,5 +19,10 @@ namespace JwtAuthentication.Server.Controllers
 
             return Unauthorized();
         }
+
+        [HttpGet("Name")]
+        public IActionResult GetUserName() => httpContextAccessor.HttpContext?.User.Identity?.IsAuthenticated ?? false
+            ? Ok(httpContextAccessor.HttpContext.User.Identity.Name)
+            : Unauthorized();
     }
 }

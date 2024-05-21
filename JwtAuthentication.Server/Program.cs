@@ -3,6 +3,7 @@ using JwtAuthentication.DAL;
 using JwtAuthentication.DAL.SampleData;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 namespace JwtAuthentication.Server
@@ -32,6 +33,20 @@ namespace JwtAuthentication.Server
             app.MapFallbackToFile("/index.html");
 
             app.MapIdentityApi<IdentityUser>();
+
+            app.MapPost("/logout", async (SignInManager<IdentityUser> signInManager, [FromBody] object empty) =>
+            {
+                if (empty != null)
+                {
+                    await signInManager.SignOutAsync();
+
+                    return Results.Ok();
+                }
+
+                return Results.Unauthorized();
+            })
+            .WithOpenApi()
+            .RequireAuthorization();
 
             app.Run();
         }
@@ -86,37 +101,6 @@ namespace JwtAuthentication.Server
                 .PersistKeysToDbContext<JwtAuthenticationContext>();
 
             services.AddAuthorization();
-
-            services.ConfigureApplicationCookie(options =>
-            {
-                options.Events.OnRedirectToAccessDenied = context =>
-                {
-                    if (!context.Request.Path.StartsWithSegments("/Identity"))
-                    {
-                        context.Response.StatusCode = 403;
-                    }
-                    else
-                    {
-                        context.Response.Redirect(options.AccessDeniedPath);
-                    }
-
-                    return Task.CompletedTask;
-                };
-
-                options.Events.OnRedirectToLogin = context =>
-                {
-                    if (!context.Request.Path.StartsWithSegments("/Identity"))
-                    {
-                        context.Response.StatusCode = 401;
-                    }
-                    else
-                    {
-                        context.Response.Redirect(options.LoginPath);
-                    }
-
-                    return Task.CompletedTask;
-                };
-            });
         }
 
         private static void ConfigureDatabase(IServiceCollection services, ConfigurationManager configuration, IWebHostEnvironment webHostEnvironment)

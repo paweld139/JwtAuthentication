@@ -1,4 +1,8 @@
-import { useCallback, useState } from "react";
+import {
+    useCallback,
+    useState
+} from "react";
+
 import {
     Alert,
     Button,
@@ -9,19 +13,17 @@ import {
     Label
 } from "reactstrap";
 
-interface Props {
-    setAuthorized: (authorized: boolean) => void;
-}
+import { useNavigate } from "react-router-dom";
 
-const Login = ({
-    setAuthorized
-}: Props) => {
+const Login = () => {
+    const navigate = useNavigate();
+
     const [data, setData] = useState({
         email: "",
         password: ""
     });
 
-    const [isValidationError, setIsValidationError] = useState(false);
+    const [error, setError] = useState<string | null>(null);
 
     const login = useCallback(async () => {
         const response = await fetch("login", {
@@ -37,12 +39,14 @@ const Login = ({
         if (response.ok) {
             localStorage.setItem("token", body.accessToken);
 
-            setAuthorized(true);
+            localStorage.setItem("refreshToken", body.refreshToken);
+
+            navigate("/");
         }
         else {
-            setIsValidationError(true);
+            setError('Invalid credentials');
         }
-    }, [data, setAuthorized]);
+    }, [data, navigate]);
 
     const onSubmit = useCallback((e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -50,13 +54,13 @@ const Login = ({
         login();
     }, [login]);
 
+    const goToRegister = useCallback(() => navigate('/register'), [navigate]);
+
     return (
         <Container>
             <h1>Login</h1>
 
-            <Alert color="danger" isOpen={isValidationError}>
-                Invalid credentials
-            </Alert>
+            {error && <Alert color="danger">{error}</Alert>}
 
             <Form onSubmit={onSubmit}>
                 <FormGroup>
@@ -81,6 +85,8 @@ const Login = ({
 
                 <Button>Submit</Button>
             </Form>
+
+            <Button color="link" onClick={goToRegister}>Register</Button>
         </Container>
     );
 };
