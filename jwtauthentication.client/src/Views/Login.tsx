@@ -6,47 +6,34 @@ import {
 import {
     Alert,
     Button,
-    Container,
-    Form,
-    FormGroup,
-    Input,
-    Label
+    Container
 } from "reactstrap";
 
-import { useNavigate } from "react-router-dom";
+import {
+    useNavigate
+} from "react-router-dom";
+
+import {
+    login as executeLogin
+} from "../requests";
+
+import {
+    LoginModel
+} from "../interfaces";
+
+import AppForm from "../components/AppForm";
 
 const Login = () => {
     const navigate = useNavigate();
 
-    const [data, setData] = useState({
+    const [data, setData] = useState<LoginModel>({
         email: "",
         password: ""
     });
 
     const [error, setError] = useState<string | null>(null);
 
-    const login = useCallback(async () => {
-        const response = await fetch("login", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(data)
-        });
-
-        const body = await response.json();
-
-        if (response.ok) {
-            localStorage.setItem("token", body.accessToken);
-
-            localStorage.setItem("refreshToken", body.refreshToken);
-
-            navigate("/");
-        }
-        else {
-            setError('Invalid credentials');
-        }
-    }, [data, navigate]);
+    const login = useCallback(() => executeLogin(data, setError, navigate), [data, navigate]);
 
     const onSubmit = useCallback((e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -62,29 +49,26 @@ const Login = () => {
 
             {error && <Alert color="danger">{error}</Alert>}
 
-            <Form onSubmit={onSubmit}>
-                <FormGroup>
-                    <Label for="username">Username</Label>
-                    <Input
-                        type="text"
-                        id="username"
-                        onChange={(e) => setData({ ...data, email: e.target.value })}
-                        required
-                    />
-                </FormGroup>
-
-                <FormGroup>
-                    <Label for="password">Password</Label>
-                    <Input
-                        type="password"
-                        id="password"
-                        onChange={(e) => setData({ ...data, password: e.target.value })}
-                        required
-                    />
-                </FormGroup>
-
-                <Button>Submit</Button>
-            </Form>
+            <AppForm
+                onSubmit={onSubmit}
+                data={data}
+                setData={setData}
+                buttonText="Submit"
+                inputs={[
+                    {
+                        name: "email",
+                        label: "Email",
+                        type: "email",
+                        required: true
+                    },
+                    {
+                        name: "password",
+                        label: "Password",
+                        type: "password",
+                        required: true
+                    }
+                ]}
+            />
 
             <Button color="link" onClick={goToRegister}>Register</Button>
         </Container>
