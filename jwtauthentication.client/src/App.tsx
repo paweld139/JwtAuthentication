@@ -23,6 +23,8 @@ import {
     updateUserName
 } from "./requests";
 
+import ElementWithAuth from "./components/ElementWithAuth";
+
 function App() {
     const [userName, setUserName] = useState<string | null>(null);
 
@@ -46,7 +48,13 @@ function App() {
             </Navbar>
 
             <Routes>
-                {AppRoutes.map((route) => <Route key={route.name} {...route} />)}
+                {AppRoutes.map((route) => (
+                    <Route
+                        key={route.name}
+                        {...route}
+                        element={route.requiresAuth ? <ElementWithAuth element={route.element} /> : route.element}
+                    />
+                ))}
             </Routes>
         </>
     );
