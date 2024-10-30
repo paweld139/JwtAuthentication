@@ -107,7 +107,7 @@ namespace JwtAuthentication.Server
         {
             var connectionString = configuration.GetConnectionString("DefaultConnection");
 
-            services.AddDbContext<JwtAuthenticationContext>(o => o.UseSqlServer(connectionString, o => o.MigrationsAssembly("JwtAuthentication.DAL")));
+            services.AddNpgsql<JwtAuthenticationContext>(connectionString);
 
             var isDevelopment = webHostEnvironment.IsDevelopment();
 
